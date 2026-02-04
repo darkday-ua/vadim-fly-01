@@ -19,7 +19,7 @@ $router->get('/login', function (\App\Http\Request $request, array $app) {
         return Response::redirect('/dashboard');
     }
     $view = new View($app['config']['view_path']);
-    $html = $view->render('login', ['title' => 'Log in']);
+    $html = $view->render('login', ['title' => 'hello vadim!']);
     return Response::html($html);
 });
 
@@ -32,7 +32,7 @@ $router->post('/login', function (\App\Http\Request $request, array $app) {
         return Response::redirect('/dashboard');
     }
     $view = new View($app['config']['view_path']);
-    $html = $view->render('login', ['title' => 'Log in', 'error' => 'Invalid credentials']);
+    $html = $view->render('login', ['title' => 'hello vadim!', 'error' => 'Invalid credentials']);
     return Response::html($html);
 });
 
