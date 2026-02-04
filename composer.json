@@ -1,0 +1,20 @@
+{
+    "name": "fly/app",
+    "description": "Plain PHP application — views, auth, MySQL",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/src/"
+        },
+        "files": [
+            "app/config/env.php"
+        ]
+    },
+    "require": {
+        "php": ">=8.1"
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}
