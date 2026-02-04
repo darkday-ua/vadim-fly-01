@@ -9,5 +9,5 @@ $content .= '<form method="post" action="/login">
     <label>Password <input type="password" name="password" required autocomplete="current-password"></label>
     <button type="submit" class="btn btn-primary">Login</button>
 </form>';
-$nav = '<a href="/">Home</a>';
+$nav = '';
 require __DIR__ . '/layout.php';

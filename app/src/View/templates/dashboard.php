@@ -33,5 +33,5 @@ $content .= '<div style="margin-top: 2rem;">';
 $content .= '<form method="post" action="/logout" style="display: inline;"><button type="submit" class="btn btn-outline">Logout</button></form>';
 $content .= '</div>';
 
-$nav = '<a href="/">Home</a> <a href="/dashboard">Dashboard</a> <form method="post" action="/logout" style="display: inline;"><button type="submit" class="btn btn-outline">Logout</button></form>';
+$nav = '<a href="/dashboard">Dashboard</a> <form method="post" action="/logout" style="display: inline;"><button type="submit" class="btn btn-outline">Logout</button></form>';
 require __DIR__ . '/layout.php';

@@ -9,9 +9,10 @@ use App\View\View;
 $router = new Router();
 
 $router->get('/', function (\App\Http\Request $request, array $app) {
-    $view = new View($app['config']['view_path']);
-    $html = $view->render('home', ['title' => 'Home']);
-    return Response::html($html);
+    if ($app['auth']->isLoggedIn()) {
+        return Response::redirect('/dashboard');
+    }
+    return Response::redirect('/login');
 });
 
 $router->get('/login', function (\App\Http\Request $request, array $app) {
@@ -38,7 +39,7 @@ $router->post('/login', function (\App\Http\Request $request, array $app) {
 
 $router->post('/logout', function (\App\Http\Request $request, array $app) {
     $app['auth']->logout();
-    return Response::redirect('/');
+    return Response::redirect('/login');
 }, true);
 
 $router->get('/dashboard', function (\App\Http\Request $request, array $app) {
