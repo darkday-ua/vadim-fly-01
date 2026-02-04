@@ -22,6 +22,7 @@ class CreateUsersTable extends Migration
                 username VARCHAR(191) NOT NULL UNIQUE,
                 password_hash VARCHAR(255) NOT NULL,
                 last_login_at DATETIME NULL,
+                click_counter INT NOT NULL DEFAULT 0,
                 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         ");

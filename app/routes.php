@@ -42,12 +42,23 @@ $router->post('/logout', function (\App\Http\Request $request, array $app) {
 }, true);
 
 $router->get('/dashboard', function (\App\Http\Request $request, array $app) {
+    $user = $app['auth']->user($app['db']);
     $view = new View($app['config']['view_path']);
     $html = $view->render('dashboard', [
         'title' => 'Dashboard',
-        'userId' => $app['auth']->userId(),
+        'user' => $user,
     ]);
     return Response::html($html);
+}, true);
+
+$router->post('/dashboard/click/increment', function (\App\Http\Request $request, array $app) {
+    $app['auth']->incrementClickCounter($app['db']);
+    return Response::redirect('/dashboard');
+}, true);
+
+$router->post('/dashboard/click/decrement', function (\App\Http\Request $request, array $app) {
+    $app['auth']->decrementClickCounter($app['db']);
+    return Response::redirect('/dashboard');
 }, true);
 
 return $router;

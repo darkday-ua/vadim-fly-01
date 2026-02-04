@@ -65,7 +65,7 @@ class Auth
         return $this->config['login_path'] ?? '/login';
     }
 
-    /** Get current user data (username, last_login_at, etc.) or null if not logged in. */
+    /** Get current user data (username, last_login_at, click_counter, etc.) or null if not logged in. */
     public function user(Connection $db): ?array
     {
         $userId = $this->userId();
@@ -73,7 +73,33 @@ class Auth
             return null;
         }
         return $db->fetchOne(
-            'SELECT id, username, last_login_at, created_at FROM users WHERE id = ? LIMIT 1',
+            'SELECT id, username, last_login_at, click_counter, created_at FROM users WHERE id = ? LIMIT 1',
+            [$userId]
+        );
+    }
+
+    /** Increment click counter for current user. */
+    public function incrementClickCounter(Connection $db): void
+    {
+        $userId = $this->userId();
+        if ($userId === null) {
+            return;
+        }
+        $db->execute(
+            'UPDATE users SET click_counter = click_counter + 1 WHERE id = ?',
+            [$userId]
+        );
+    }
+
+    /** Decrement click counter for current user. */
+    public function decrementClickCounter(Connection $db): void
+    {
+        $userId = $this->userId();
+        if ($userId === null) {
+            return;
+        }
+        $db->execute(
+            'UPDATE users SET click_counter = GREATEST(0, click_counter - 1) WHERE id = ?',
             [$userId]
         );
     }
