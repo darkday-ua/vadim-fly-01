@@ -4,6 +4,23 @@ Framework-free PHP app: views, session-based auth, MySQL.
 
 ## Setup
 
+### Option 1: Docker (Recommended)
+
+```bash
+cp .env.example .env
+# Edit .env: set DB_HOST=mysql for Docker
+
+docker-compose up -d
+docker-compose exec app php scripts/migrate.php
+docker-compose exec app php scripts/seed.php
+```
+
+Open http://localhost:8080
+
+See [docs/DOCKER.md](docs/DOCKER.md) for detailed Docker instructions.
+
+### Option 2: Local PHP
+
 ```bash
 composer install
 cp .env.example .env
@@ -18,7 +35,7 @@ php scripts/seed.php
 
 Document root: **`app/public/`**. Point your server (Apache/Nginx/PHP built-in) at it.
 
-### PHP built-in server
+#### PHP built-in server
 
 ```bash
 php -S localhost:8080 -t app/public

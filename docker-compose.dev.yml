@@ -1,0 +1,12 @@
+version: '3.8'
+
+# Development override - includes volume mounts for live code editing
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  app:
+    volumes:
+      - ./:/var/www/html
+    environment:
+      - APP_DEBUG=1
+      - APP_ENV=local
