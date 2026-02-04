@@ -23,10 +23,12 @@ fly/
 │   │   ├── Auth/            # Auth logic, session, login/logout
 │   │   ├── Db/              # DB connection, queries, repositories
 │   │   ├── Http/            # Request, Response, Router
-│   │   └── View/            # View rendering (templates/pages)
-│   └── config/             # Config (env-based)
-├── docs/                   # Documentation (this file, etc.)
-├── scripts/                # Dev/deploy scripts if needed
+│   │   └── View/            # View helper + templates/ (login, dashboard, layout)
+│   ├── config/              # config.php, env.php (env-based)
+│   ├── migrations/         # DB migrations
+│   └── routes.php          # Route definitions
+├── docs/                    # Documentation, schema
+├── scripts/                 # migrate.php, seed.php, docker-*.sh
 └── composer.json           # PHP dependencies (minimal: no framework)
 ```
 
@@ -43,7 +45,7 @@ Other top-level pieces (e.g. `tests/`, `docker/`, `.env.example`) can be added a
    Load config (e.g. from env), create DB connection (PDO), optionally start session. No global state beyond what’s needed for request lifecycle.
 
 3. **Routing**  
-   A small router (in `Http/`) maps URL + method to a handler (closure or class). No framework router; we define routes explicitly (e.g. in a `routes.php` or similar).
+   A small router (in `Http/`) maps URL + method to a handler (closure or class). Routes: `/` → redirect to `/login` or `/dashboard`; `/login` (GET/POST); `/dashboard` (protected); `/logout` (POST, protected).
 
 4. **Authorization**  
    Before running the handler, we check if the route is protected. If protected and user is not logged in → redirect to login or 401. Session holds user identity (e.g. user id).

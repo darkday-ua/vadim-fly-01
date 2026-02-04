@@ -1,4 +1,4 @@
--- MySQL schema for Fly app (run once to create DB and tables)
+-- MySQL schema for Fly app (reference; for new installs prefer: php scripts/migrate.php)
 
 CREATE DATABASE IF NOT EXISTS fly CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE fly;

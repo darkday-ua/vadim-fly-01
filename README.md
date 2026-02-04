@@ -1,55 +1,34 @@
 # Fly — Plain PHP monorepo
 
-Framework-free PHP app: views, session-based auth, MySQL.
+Framework-free PHP app: session-based auth, MySQL, views. **App starts at the login page** (no separate home page).
 
-## Setup
+## Quick start
 
-### Option 1: Docker (Recommended)
+| How to run | See |
+|------------|-----|
+| **Locally without Docker** (PHP + MySQL on host) | [docs/RUN-AND-DEPLOY.md#1-run-locally-without-docker](docs/RUN-AND-DEPLOY.md#1-run-locally-without-docker) |
+| **Locally with Docker** (containers) | [docs/RUN-AND-DEPLOY.md#2-run-locally-with-docker](docs/RUN-AND-DEPLOY.md#2-run-locally-with-docker) |
+| **Build Docker image** (for push/deploy) | [docs/RUN-AND-DEPLOY.md#3-build-the-docker-image](docs/RUN-AND-DEPLOY.md#3-build-the-docker-image) |
+| **Deploy on remote server** | [docs/RUN-AND-DEPLOY.md#4-deploy-on-a-remote-server](docs/RUN-AND-DEPLOY.md#4-deploy-on-a-remote-server) |
+
+**TL;DR — local with Docker:**
 
 ```bash
-cp .env.example .env
-# Edit .env: set DB_HOST=mysql for Docker
-
-docker-compose up -d
-docker-compose exec app php scripts/migrate.php
-docker-compose exec app php scripts/seed.php
+cp .env.example .env   # edit: DB_HOST=mysql, DB_*, DEFAULT_*
+docker compose up -d
+./scripts/docker-migrate.sh
+# Open http://localhost:8080
 ```
 
-Open http://localhost:8080
-
-See [docs/DOCKER.md](docs/DOCKER.md) for detailed Docker instructions.
-
-### Option 2: Local PHP
+**TL;DR — local without Docker:**
 
 ```bash
-composer install
-cp .env.example .env
-# Edit .env with your DB credentials and default user (DEFAULT_USERNAME, DEFAULT_PASSWORD)
-
-# Run migrations
-php scripts/migrate.php
-
-# Seed default user (optional, uses DEFAULT_USERNAME/DEFAULT_PASSWORD from .env)
-php scripts/seed.php
-```
-
-Document root: **`app/public/`**. Point your server (Apache/Nginx/PHP built-in) at it.
-
-#### PHP built-in server
-
-```bash
+composer install && cp .env.example .env   # edit DB_*, DEFAULT_*
+php scripts/migrate.php && php scripts/seed.php
 php -S localhost:8080 -t app/public
 ```
 
-Then open http://localhost:8080
-
-### Default login
-
-The default user is created via `php scripts/seed.php` using:
-- **Username:** From `DEFAULT_USERNAME` in `.env` (default: `admin`)
-- **Password:** From `DEFAULT_PASSWORD` in `.env` (default: `admin`)
-
-⚠️ Change these credentials in `.env` for production!
+Default user is created by `php scripts/seed.php` from `DEFAULT_USERNAME` / `DEFAULT_PASSWORD` in `.env`. Re-run seed to force-update password.
 
 ## Layout
 
@@ -58,6 +37,8 @@ The default user is created via `php scripts/seed.php` using:
 - `app/routes.php` — route definitions
 - `app/src/` — Http, Db, Auth, View
 - `app/config/` — env and config
-- `docs/` — architecture, schema
+- `app/migrations/` — database migrations
+- `scripts/` — migrate.php, seed.php, docker-migrate.sh, docker-setup.sh
+- `docs/` — run/deploy, architecture, auth, schema
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the bird’s-eye view.
+See [docs/RUN-AND-DEPLOY.md](docs/RUN-AND-DEPLOY.md) for run and deploy details, [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the bird’s-eye view, and [docs/AUTH.md](docs/AUTH.md) for auth and migrations.

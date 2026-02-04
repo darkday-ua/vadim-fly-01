@@ -10,6 +10,7 @@ The `users` table includes:
 - `username` - Unique username (max 191 chars)
 - `password_hash` - Bcrypt hashed password
 - `last_login_at` - Timestamp of last successful login (nullable)
+- `click_counter` - Integer, default 0 (per-user counter)
 - `created_at` - Account creation timestamp
 
 ## Migration System
@@ -27,8 +28,9 @@ This will:
 
 ### Migration Files
 
-- `001_create_users_table.php` - Creates users table with all columns including `last_login_at`
-- `002_add_last_login_to_existing_users.php` - Adds `last_login_at` to existing tables (if you already had users table)
+- `001_create_users_table.php` - Creates users table (username, password_hash, last_login_at, click_counter, created_at)
+- `002_add_last_login_to_existing_users.php` - Adds `last_login_at` to existing users table
+- `003_add_click_counter_to_users.php` - Adds `click_counter` to existing users table
 
 ## Authentication Flow
 
@@ -48,7 +50,10 @@ This will:
    - Returns `true` if user is logged in
 
 5. **Get user** (`Auth::user($db)`):
-   - Returns user data array (id, username, last_login_at, created_at) or `null`
+   - Returns user data array (id, username, last_login_at, click_counter, created_at) or `null`
+
+6. **Click counter** (`Auth::incrementClickCounter($db)` / `Auth::decrementClickCounter($db)`):
+   - Increment or decrement the current user's `click_counter` (decrement does not go below 0)
 
 ## Usage in Routes
 

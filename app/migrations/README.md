@@ -53,12 +53,10 @@ class AddEmailToUsers extends Migration
 
 ## Migration Naming
 
-- File: `001_create_users_table.php`
+- File: `001_create_users_table.php` (numeric prefix is optional; used for order)
 - Class: `CreateUsersTable` (auto-generated from filename)
 - Namespace: `App\Db\Migrations\CreateUsersTable`
 
 The class name is derived from the filename by:
-- Removing `.php`
-- Splitting on `_`
-- Capitalizing each part
-- Joining together
+- Stripping a leading numeric prefix (e.g. `001_`)
+- Removing `.php`, splitting on `_`, capitalizing each part, joining (e.g. `create_users_table` → `CreateUsersTable`)
