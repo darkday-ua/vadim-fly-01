@@ -23,6 +23,8 @@ return [
 
     'auth' => [
         'login_path' => getenv('LOGIN_PATH') ?: '/login',
+        'default_username' => getenv('DEFAULT_USERNAME') ?: 'admin',
+        'default_password' => getenv('DEFAULT_PASSWORD') ?: 'admin',
     ],
 
     'view_path' => realpath(dirname(__DIR__) . '/src/View/templates') ?: dirname(__DIR__) . '/src/View/templates',

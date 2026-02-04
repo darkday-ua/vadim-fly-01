@@ -33,9 +33,15 @@ class Auth
         return (int) $row['id'];
     }
 
-    public function login(int $userId): void
+    public function login(Connection $db, int $userId): void
     {
         $_SESSION[self::USER_ID_KEY] = $userId;
+        
+        // Record last login time
+        $db->execute(
+            'UPDATE users SET last_login_at = NOW() WHERE id = ?',
+            [$userId]
+        );
     }
 
     public function logout(): void
@@ -57,5 +63,18 @@ class Auth
     public function loginPath(): string
     {
         return $this->config['login_path'] ?? '/login';
+    }
+
+    /** Get current user data (username, last_login_at, etc.) or null if not logged in. */
+    public function user(Connection $db): ?array
+    {
+        $userId = $this->userId();
+        if ($userId === null) {
+            return null;
+        }
+        return $db->fetchOne(
+            'SELECT id, username, last_login_at, created_at FROM users WHERE id = ? LIMIT 1',
+            [$userId]
+        );
     }
 }

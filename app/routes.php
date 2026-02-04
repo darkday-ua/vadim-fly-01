@@ -28,7 +28,7 @@ $router->post('/login', function (\App\Http\Request $request, array $app) {
     $password = (string) $request->get('password', '');
     $userId = $app['auth']->attempt($app['db'], $username, $password);
     if ($userId !== null) {
-        $app['auth']->login($userId);
+        $app['auth']->login($app['db'], $userId);
         return Response::redirect('/dashboard');
     }
     $view = new View($app['config']['view_path']);

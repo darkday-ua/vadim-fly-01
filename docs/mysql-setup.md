@@ -33,17 +33,25 @@ EXIT;
 
 To use a different password, change `'secret'` in the `CREATE USER` line and set the same value in your `.env` as `DB_PASSWORD`.
 
-## 2. Load the schema and seed user
-
-Run the schema as **root** (it creates the database if missing, then tables and seed user):
+## 2. Run migrations
 
 ```bash
-mysql -u root -p < docs/schema.sql
+php scripts/migrate.php
 ```
 
-This creates the `users` table and inserts the example user **admin** / **admin**.
+This creates the `users` table and a `migrations` tracking table.
 
-## 3. Check your `.env`
+## 3. Seed default user (optional)
+
+Create the default user using credentials from `.env`:
+
+```bash
+php scripts/seed.php
+```
+
+This uses `DEFAULT_USERNAME` and `DEFAULT_PASSWORD` from your `.env` file (defaults to `admin` / `admin`).
+
+## 4. Check your `.env`
 
 Ensure `.env` matches your MySQL setup, for example:
 
@@ -53,11 +61,15 @@ DB_PORT=3306
 DB_NAME=fly
 DB_USER=fly
 DB_PASSWORD=secret
+
+# Default user credentials (used by seed script)
+DEFAULT_USERNAME=admin
+DEFAULT_PASSWORD=admin
 ```
 
 If MySQL runs on a non-default port (e.g. Docker on 13306), set `DB_PORT=13306`.
 
-## 4. Test the connection
+## 5. Test the connection
 
 From the project root:
 
