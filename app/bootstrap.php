@@ -8,12 +8,21 @@ declare(strict_types=1);
  */
 function bootstrap(): array
 {
-    $root = dirname(__DIR__);  // repo root (fly/) when bootstrap is at fly/app/bootstrap.php
-    $appDir = $root . '/app';
+    // App dir = directory containing this file (app/ or document root when only app is deployed)
+    $appDir = __DIR__;
+    $root = is_dir($appDir . '/../vendor') ? dirname($appDir) : $appDir;
 
-    require_once $root . '/vendor/autoload.php';
+    $autoload = $root . '/vendor/autoload.php';
+    if (!is_file($autoload)) {
+        throw new \RuntimeException('Composer autoload not found: ' . $autoload);
+    }
+    require_once $autoload;
 
-    $config = require $appDir . '/config/config.php';
+    $configFile = $appDir . '/config/config.php';
+    if (!is_file($configFile)) {
+        throw new \RuntimeException('Config file not found: ' . $configFile);
+    }
+    $config = require $configFile;
 
     try {
         $pdo = \App\Db\Connection::fromConfig($config['db']);
@@ -42,7 +51,11 @@ function bootstrap(): array
 
     $auth = new \App\Auth\Auth($config['auth']);
 
-    $router = require $appDir . '/routes.php';
+    $routesFile = $appDir . '/routes.php';
+    if (!is_file($routesFile)) {
+        throw new \RuntimeException('Routes file not found: ' . $routesFile);
+    }
+    $router = require $routesFile;
 
     return [
         'config' => $config,

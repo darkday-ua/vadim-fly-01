@@ -30,8 +30,8 @@ $content .= '</div>';
 $content .= '</div>';
 
 $content .= '<div style="margin-top: 2rem;">';
-$content .= '<form method="post" action="/logout"><button type="submit">Log out</button></form>';
+$content .= '<form method="post" action="/logout" style="display: inline;"><button type="submit" class="btn btn-outline">Logout</button></form>';
 $content .= '</div>';
 
-$nav = '<a href="/">Home</a> <a href="/dashboard">Dashboard</a>';
+$nav = '<a href="/">Home</a> <a href="/dashboard">Dashboard</a> <form method="post" action="/logout" style="display: inline;"><button type="submit" class="btn btn-outline">Logout</button></form>';
 require __DIR__ . '/layout.php';

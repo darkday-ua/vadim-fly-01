@@ -7,7 +7,7 @@ if (!empty($error)) {
 $content .= '<form method="post" action="/login">
     <label>Username <input type="text" name="username" required autocomplete="username"></label>
     <label>Password <input type="password" name="password" required autocomplete="current-password"></label>
-    <button type="submit">Log in</button>
+    <button type="submit" class="btn btn-primary">Login</button>
 </form>';
 $nav = '<a href="/">Home</a>';
 require __DIR__ . '/layout.php';
