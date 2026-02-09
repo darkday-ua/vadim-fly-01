@@ -48,6 +48,8 @@ $router->get('/dashboard', function (\App\Http\Request $request, array $app) {
     $html = $view->render('dashboard', [
         'title' => 'Dashboard',
         'user' => $user,
+        'success' => $request->get('success'),
+        'error' => $request->get('error'),
     ]);
     return Response::html($html);
 }, true);
@@ -60,6 +62,19 @@ $router->post('/dashboard/click/increment', function (\App\Http\Request $request
 $router->post('/dashboard/click/decrement', function (\App\Http\Request $request, array $app) {
     $app['auth']->decrementClickCounter($app['db']);
     return Response::redirect('/dashboard');
+}, true);
+
+$router->post('/dashboard/users/create', function (\App\Http\Request $request, array $app) {
+    $username = trim((string) $request->get('username', ''));
+    $password = (string) $request->get('password', '');
+    
+    $result = $app['auth']->createUser($app['db'], $username, $password);
+    
+    if ($result['success']) {
+        return Response::redirect('/dashboard?success=User created successfully');
+    }
+    
+    return Response::redirect('/dashboard?error=' . urlencode($result['error']));
 }, true);
 
 return $router;

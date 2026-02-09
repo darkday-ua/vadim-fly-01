@@ -103,4 +103,67 @@ class Auth
             [$userId]
         );
     }
+
+    /**
+     * Validate password complexity.
+     * Requirements: 8+ chars, contains a-zA-Z, 0-9, and special characters.
+     * Returns error message string if invalid, null if valid.
+     */
+    public function validatePassword(string $password): ?string
+    {
+        if (strlen($password) < 8) {
+            return 'Password must be at least 8 characters long';
+        }
+
+        if (!preg_match('/[a-zA-Z]/', $password)) {
+            return 'Password must contain at least one letter (a-z, A-Z)';
+        }
+
+        if (!preg_match('/[0-9]/', $password)) {
+            return 'Password must contain at least one digit (0-9)';
+        }
+
+        if (!preg_match('/[^a-zA-Z0-9]/', $password)) {
+            return 'Password must contain at least one special character';
+        }
+
+        return null; // Valid
+    }
+
+    /**
+     * Create a new user.
+     * Returns array: ['success' => true, 'userId' => int] or ['success' => false, 'error' => string]
+     */
+    public function createUser(Connection $db, string $username, string $password): array
+    {
+        $username = trim($username);
+        if ($username === '') {
+            return ['success' => false, 'error' => 'Username is required'];
+        }
+
+        if ($password === '') {
+            return ['success' => false, 'error' => 'Password is required'];
+        }
+
+        // Validate password complexity
+        $passwordError = $this->validatePassword($password);
+        if ($passwordError !== null) {
+            return ['success' => false, 'error' => $passwordError];
+        }
+
+        // Check for duplicate username
+        $existing = $db->fetchOne('SELECT id FROM users WHERE username = ? LIMIT 1', [$username]);
+        if ($existing !== null) {
+            return ['success' => false, 'error' => 'Username already exists'];
+        }
+
+        // Create user
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+        $db->execute(
+            'INSERT INTO users (username, password_hash) VALUES (?, ?)',
+            [$username, $passwordHash]
+        );
+
+        return ['success' => true, 'userId' => (int) $db->lastInsertId()];
+    }
 }
