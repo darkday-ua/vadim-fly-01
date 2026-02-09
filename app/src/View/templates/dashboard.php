@@ -29,6 +29,41 @@ $content .= '</form>';
 $content .= '</div>';
 $content .= '</div>';
 
+// Users list table
+$usersList = $usersList ?? [];
+$content .= '<div style="margin: 2rem 0; overflow-x: auto;">';
+$content .= '<h2>Users</h2>';
+$content .= '<table style="width: 100%; border-collapse: collapse; margin-top: 0.5rem;">';
+$content .= '<thead><tr style="background: #f3f4f6;">';
+$content .= '<th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd;">Username</th>';
+$content .= '<th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd;">Click count</th>';
+$content .= '<th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd;">Lock / Unlock</th>';
+$content .= '<th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd;">Mute</th>';
+$content .= '<th style="padding: 0.5rem; text-align: left; border: 1px solid #ddd;">Delete</th>';
+$content .= '</tr></thead><tbody>';
+foreach ($usersList as $u) {
+    $content .= '<tr>';
+    $content .= '<td style="padding: 0.5rem; border: 1px solid #ddd;">' . htmlspecialchars($u['username']) . '</td>';
+    $content .= '<td style="padding: 0.5rem; border: 1px solid #ddd;">' . (int) $u['click_counter'] . '</td>';
+    $content .= '<td style="padding: 0.5rem; border: 1px solid #ddd;">';
+    $content .= '<form method="post" action="/dashboard/users/toggle-lock" style="display: inline;">';
+    $content .= '<input type="hidden" name="id" value="' . (int) $u['id'] . '">';
+    $content .= '<button type="submit" class="btn ' . ($u['is_locked'] ? 'btn-primary' : 'btn-outline') . '" style="padding: 0.25rem 0.5rem; font-size: 0.875rem;">' . ($u['is_locked'] ? 'Unlock' : 'Lock') . '</button>';
+    $content .= '</form></td>';
+    $content .= '<td style="padding: 0.5rem; border: 1px solid #ddd;">';
+    $content .= '<form method="post" action="/dashboard/users/toggle-mute" style="display: inline;">';
+    $content .= '<input type="hidden" name="id" value="' . (int) $u['id'] . '">';
+    $content .= '<button type="submit" class="btn ' . ($u['is_muted'] ? 'btn-primary' : 'btn-outline') . '" style="padding: 0.25rem 0.5rem; font-size: 0.875rem;">' . ($u['is_muted'] ? 'Unmute' : 'Mute') . '</button>';
+    $content .= '</form></td>';
+    $content .= '<td style="padding: 0.5rem; border: 1px solid #ddd;">';
+    $content .= '<form method="post" action="/dashboard/users/delete" style="display: inline;" onsubmit="return confirm(\'Delete this user?\');">';
+    $content .= '<input type="hidden" name="id" value="' . (int) $u['id'] . '">';
+    $content .= '<button type="submit" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.875rem; color: #b91c1c;">Delete</button>';
+    $content .= '</form></td>';
+    $content .= '</tr>';
+}
+$content .= '</tbody></table></div>';
+
 // Show success/error messages
 if (!empty($success ?? '')) {
     $content .= '<div style="margin: 1rem 0; padding: 0.75rem; background: #d1fae5; color: #065f46; border-radius: 4px;">' . htmlspecialchars($success) . '</div>';

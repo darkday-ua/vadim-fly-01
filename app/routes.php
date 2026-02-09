@@ -44,10 +44,12 @@ $router->post('/logout', function (\App\Http\Request $request, array $app) {
 
 $router->get('/dashboard', function (\App\Http\Request $request, array $app) {
     $user = $app['auth']->user($app['db']);
+    $usersList = $app['auth']->listUsers($app['db']);
     $view = new View($app['config']['view_path']);
     $html = $view->render('dashboard', [
         'title' => 'Dashboard',
         'user' => $user,
+        'usersList' => $usersList,
         'success' => $request->get('success'),
         'error' => $request->get('error'),
     ]);
@@ -75,6 +77,38 @@ $router->post('/dashboard/users/create', function (\App\Http\Request $request, a
     }
     
     return Response::redirect('/dashboard?error=' . urlencode($result['error']));
+}, true);
+
+$router->post('/dashboard/users/delete', function (\App\Http\Request $request, array $app) {
+    $targetId = (int) $request->get('id');
+    if ($targetId > 0) {
+        $app['auth']->deleteUser($app['db'], $targetId);
+        $currentId = $app['auth']->userId();
+        if ($currentId === $targetId) {
+            $app['auth']->logout();
+            return Response::redirect('/login?success=Your account was deleted');
+        }
+        return Response::redirect('/dashboard?success=User deleted');
+    }
+    return Response::redirect('/dashboard?error=Invalid user');
+}, true);
+
+$router->post('/dashboard/users/toggle-lock', function (\App\Http\Request $request, array $app) {
+    $targetId = (int) $request->get('id');
+    if ($targetId > 0) {
+        $app['auth']->toggleUserLock($app['db'], $targetId);
+        return Response::redirect('/dashboard?success=User lock updated');
+    }
+    return Response::redirect('/dashboard?error=Invalid user');
+}, true);
+
+$router->post('/dashboard/users/toggle-mute', function (\App\Http\Request $request, array $app) {
+    $targetId = (int) $request->get('id');
+    if ($targetId > 0) {
+        $app['auth']->toggleUserMute($app['db'], $targetId);
+        return Response::redirect('/dashboard?success=User mute updated');
+    }
+    return Response::redirect('/dashboard?error=Invalid user');
 }, true);
 
 return $router;
