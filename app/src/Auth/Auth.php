@@ -76,9 +76,16 @@ class Auth
             return null;
         }
         return $db->fetchOne(
-            'SELECT id, username, last_login_at, click_counter, is_locked, is_muted, created_at FROM users WHERE id = ? LIMIT 1',
+            'SELECT id, username, role, last_login_at, click_counter, is_locked, is_muted, created_at FROM users WHERE id = ? LIMIT 1',
             [$userId]
         );
+    }
+
+    /** Whether the current user has role admin. */
+    public function isAdmin(Connection $db): bool
+    {
+        $u = $this->user($db);
+        return $u !== null && ($u['role'] ?? '') === 'admin';
     }
 
     /** Increment click counter for current user (no-op if user is muted). */
@@ -115,14 +122,15 @@ class Auth
         );
     }
 
-    /** List all users (id, username, click_counter, is_locked, is_muted). */
+    /** List all users (id, username, role, click_counter, is_locked, is_muted). */
     public function listUsers(Connection $db): array
     {
-        $rows = $db->fetchAll('SELECT id, username, click_counter, is_locked, is_muted FROM users ORDER BY username');
+        $rows = $db->fetchAll('SELECT id, username, role, click_counter, is_locked, is_muted FROM users ORDER BY username');
         return array_map(function ($r) {
             return [
                 'id' => (int) $r['id'],
                 'username' => $r['username'],
+                'role' => $r['role'] ?? 'user',
                 'click_counter' => (int) ($r['click_counter'] ?? 0),
                 'is_locked' => !empty($r['is_locked']),
                 'is_muted' => !empty($r['is_muted']),
@@ -191,7 +199,7 @@ class Auth
      * Create a new user.
      * Returns array: ['success' => true, 'userId' => int] or ['success' => false, 'error' => string]
      */
-    public function createUser(Connection $db, string $username, string $password): array
+    public function createUser(Connection $db, string $username, string $password, string $role = 'user'): array
     {
         $username = trim($username);
         if ($username === '') {
@@ -214,13 +222,33 @@ class Auth
             return ['success' => false, 'error' => 'Username already exists'];
         }
 
+        $role = in_array($role, ['admin', 'user'], true) ? $role : 'user';
+
         // Create user
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
         $db->execute(
-            'INSERT INTO users (username, password_hash) VALUES (?, ?)',
-            [$username, $passwordHash]
+            'INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)',
+            [$username, $passwordHash, $role]
         );
 
         return ['success' => true, 'userId' => (int) $db->lastInsertId()];
+    }
+
+    /**
+     * Set role for a user. Fails if target is current user (cannot change own role).
+     * Returns ['success' => true] or ['success' => false, 'error' => string].
+     */
+    public function setUserRole(Connection $db, int $targetUserId, string $role): array
+    {
+        if ($this->userId() === $targetUserId) {
+            return ['success' => false, 'error' => 'You cannot change your own role'];
+        }
+        $role = in_array($role, ['admin', 'user'], true) ? $role : 'user';
+        $row = $db->fetchOne('SELECT id FROM users WHERE id = ?', [$targetUserId]);
+        if ($row === null) {
+            return ['success' => false, 'error' => 'User not found'];
+        }
+        $db->execute('UPDATE users SET role = ? WHERE id = ?', [$role, $targetUserId]);
+        return ['success' => true];
     }
 }
