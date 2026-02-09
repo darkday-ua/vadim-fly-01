@@ -1,6 +1,6 @@
 <?php
-$title = $title ?? 'hello vadim!';
-$content = '<h1>hello vadim!</h1>';
+$title = $title ?? 'Login';
+$content = '<h1>Welcome to our PoC application</h1>';
 if (!empty($error)) {
     $content .= '<p class="error">' . htmlspecialchars($error) . '</p>';
 }
