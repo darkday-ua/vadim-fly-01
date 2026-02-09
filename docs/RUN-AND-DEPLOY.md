@@ -245,6 +245,47 @@ docker compose exec app php scripts/migrate.php
 
 ---
 
+## 5. GitHub Actions CI/CD (deploy on push)
+
+The repo includes a workflow that builds the Docker image, pushes it to Docker Hub, and deploys to your Hetzner VM on every push to `main` (or on manual run).
+
+### 5.1 What the workflow does
+
+1. **Build and push**: Builds the app image, tags it with the git short SHA (e.g. `abc1234`) and `latest`, pushes to Docker Hub (`darkday443/vadim-fly`).
+2. **Deploy**: SSHs to your server, runs in the deploy directory:
+   - `export APP_IMAGE=darkday443/vadim-fly:<sha>`
+   - `docker compose pull && docker compose up -d`
+   - `docker compose exec -T app php scripts/migrate.php`
+
+The server’s compose file must use `image: ${APP_IMAGE}` for the app service so the deployed tag is picked up.
+
+### 5.2 Required GitHub secrets
+
+In the repo: **Settings → Secrets and variables → Actions**, add:
+
+| Secret | Description |
+|--------|-------------|
+| `DOCKERHUB_USERNAME` | Docker Hub username (e.g. `darkday443`) |
+| `DOCKERHUB_TOKEN` | Docker Hub access token (Settings → Security → Access tokens) |
+| `SSH_HOST` | Hetzner VM hostname or IP |
+| `SSH_USER` | SSH user (e.g. `root` or `deploy`) |
+| `SSH_PRIVATE_KEY` | Full contents of the private key used to SSH to the VM |
+
+Optional:
+
+| Secret | Description |
+|--------|-------------|
+| `DEPLOY_PATH` | Directory on the server where compose runs (default: `/opt/fly`) |
+
+### 5.3 Trigger
+
+- **Automatic**: Push to the `main` branch.
+- **Manual**: Actions → Build and Deploy → Run workflow.
+
+To deploy from another branch, edit `.github/workflows/deploy.yml` and change the `branches` list under `on.push`.
+
+---
+
 ## Quick reference
 
 | Goal                    | Command / doc section        |
@@ -253,5 +294,6 @@ docker compose exec app php scripts/migrate.php
 | Run locally with Docker | Section 2 (`docker compose`)|
 | Build Docker image      | Section 3 (`docker build`)  |
 | Deploy on server        | Section 4 (image + compose) |
+| CI/CD (GitHub → Hetzner)| Section 5 (secrets + push to main) |
 
 For auth, migrations, and schema details see [AUTH.md](AUTH.md) and [schema.sql](schema.sql).
