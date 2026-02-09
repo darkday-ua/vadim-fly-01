@@ -245,11 +245,66 @@ docker compose exec app php scripts/migrate.php
 
 ---
 
-## 5. GitHub Actions CI/CD (deploy on push)
+## 5. HTTPS and Let's Encrypt
+
+The stack (from repo `docker-compose.yml`) runs nginx on **port 80 and 443**. Port 80 redirects to HTTPS; port 443 serves the app with TLS. Certificates come from Let's Encrypt via the **certbot** service.
+
+### 5.1 Prerequisites
+
+- DNS for your domain points to the server (A record).
+- In the server `.env`: set `DOMAIN=your-domain.com` and `CERTBOT_EMAIL=your@email.com`.
+
+### 5.2 First-time certificate
+
+1. Start the stack so nginx is up (it will use a self-signed cert until you obtain a real one):
+
+   ```bash
+   docker compose up -d
+   ```
+
+2. Obtain the certificate (certbot writes into the shared `letsencrypt` volume). From the deploy directory, ensure `DOMAIN` and `CERTBOT_EMAIL` are in `.env`, then run:
+
+   ```bash
+   set -a && source .env && set +a
+   docker compose run --rm certbot certonly --webroot -w /var/www/certbot -d "$DOMAIN" -m "$CERTBOT_EMAIL" --agree-tos --non-interactive
+   ```
+
+3. Reload nginx to use the new certificate:
+
+   ```bash
+   docker compose exec nginx nginx -s reload
+   ```
+
+After that, **https://your-domain.com** will serve the app with a valid Let's Encrypt certificate.
+
+### 5.3 Renewal
+
+Certificates expire after 90 days. Renew and reload nginx:
+
+```bash
+docker compose run --rm certbot renew
+docker compose exec nginx nginx -s reload
+```
+
+To automate renewal, add a cron job on the server (e.g. daily):
+
+```cron
+0 3 * * * cd /opt/fly && docker compose run --rm certbot renew && docker compose exec nginx nginx -s reload
+```
+
+### 5.4 Files involved
+
+- **docker/nginx.conf.template** – Nginx config with 80 (ACME challenge + redirect) and 443 (TLS + app). `DOMAIN` is substituted at runtime.
+- **docker/nginx-entrypoint.sh** – Creates a self-signed cert if none exists, then starts nginx. Must be executable on the host (`chmod +x docker/nginx-entrypoint.sh`).
+- **certbot** service – Uses the `certbot` profile; run manually with `docker compose run --rm certbot ...`.
+
+---
+
+## 6. GitHub Actions CI/CD (deploy on push)
 
 The repo includes a workflow that builds the Docker image, pushes it to Docker Hub, and deploys to your Hetzner VM on every push to `main` (or on manual run).
 
-### 5.1 What the workflow does
+### 6.1 What the workflow does
 
 1. **Build and push**: Builds the app image, tags it with the git short SHA (e.g. `abc1234`) and `latest`, pushes to Docker Hub (`darkday443/vadim-fly`).
 2. **Deploy**: SSHs to your server, runs in the deploy directory:
@@ -259,7 +314,7 @@ The repo includes a workflow that builds the Docker image, pushes it to Docker H
 
 The server’s compose file must use `image: ${APP_IMAGE}` for the app service so the deployed tag is picked up.
 
-### 5.2 Required GitHub secrets
+### 6.2 Required GitHub secrets
 
 In the repo: **Settings → Secrets and variables → Actions**, add:
 
@@ -277,7 +332,7 @@ Optional:
 |--------|-------------|
 | `DEPLOY_PATH` | Directory on the server where compose runs (default: `/opt/fly`) |
 
-### 5.3 Trigger
+### 6.3 Trigger
 
 - **Automatic**: Push to the `main` branch.
 - **Manual**: Actions → Build and Deploy → Run workflow.
@@ -294,6 +349,7 @@ To deploy from another branch, edit `.github/workflows/deploy.yml` and change th
 | Run locally with Docker | Section 2 (`docker compose`)|
 | Build Docker image      | Section 3 (`docker build`)  |
 | Deploy on server        | Section 4 (image + compose) |
-| CI/CD (GitHub → Hetzner)| Section 5 (secrets + push to main) |
+| HTTPS (Let's Encrypt)   | Section 5 (DOMAIN, certbot, renewal) |
+| CI/CD (GitHub → Hetzner)| Section 6 (secrets + push to main)   |
 
 For auth, migrations, and schema details see [AUTH.md](AUTH.md) and [schema.sql](schema.sql).

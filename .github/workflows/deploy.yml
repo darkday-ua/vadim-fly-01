@@ -75,6 +75,7 @@ jobs:
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new \
             ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
             "cd ${DEPLOY_PATH} && \
+             (git pull --rebase 2>/dev/null || true) && \
              export APP_IMAGE=${APP_IMAGE} && \
              docker compose pull && \
              docker compose up -d && \
